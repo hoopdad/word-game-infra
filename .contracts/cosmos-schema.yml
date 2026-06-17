@@ -1,0 +1,76 @@
+# Cosmos DB Schema Contracts — word-game-infra
+# Documents all containers, partition keys, and data patterns.
+
+database: word-game
+api: NoSQL (SQL)
+capacity_mode: Serverless
+consistency: Session
+
+containers:
+  - name: users
+    partition_key: /id
+    description: "Stores user profiles"
+    fields:
+      - name: id
+        type: string
+        description: "Unique user identifier (from Entra External ID)"
+      - name: displayName
+        type: string
+      - name: email
+        type: string
+      - name: createdAt
+        type: string (ISO 8601)
+
+  - name: games
+    partition_key: /id
+    description: "Stores game state. Uses singleton control doc 'active-game' for single-game lock."
+    fields:
+      - name: id
+        type: string
+        description: "Game ID or 'active-game' for lock document"
+      - name: type
+        type: string
+        description: "'game' or 'control'"
+      - name: status
+        type: string
+        description: "waiting | active | completed"
+      - name: players
+        type: array
+      - name: currentRound
+        type: number
+      - name: createdAt
+        type: string (ISO 8601)
+
+  - name: scores
+    partition_key: /userId
+    description: "Per-user scoring for leaderboard queries"
+    fields:
+      - name: id
+        type: string
+        description: "Score entry ID"
+      - name: userId
+        type: string
+        description: "User ID (partition key for per-user queries)"
+      - name: gameId
+        type: string
+      - name: score
+        type: number
+      - name: round
+        type: number
+      - name: timestamp
+        type: string (ISO 8601)
+
+  - name: category_config
+    partition_key: /id
+    description: "Category URL configuration for word categories"
+    fields:
+      - name: id
+        type: string
+        description: "Category identifier"
+      - name: name
+        type: string
+      - name: url
+        type: string
+        description: "URL source for category words"
+      - name: enabled
+        type: boolean

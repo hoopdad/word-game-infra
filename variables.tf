@@ -34,10 +34,34 @@ variable "log_analytics_daily_quota_gb" {
   default     = 1
 }
 
-variable "enable_acr_private_endpoint" {
-  type        = bool
-  description = "When true, upgrades ACR to Premium and creates a private endpoint."
-  default     = false
+variable "hub_subscription_id" {
+  type        = string
+  description = "Hub subscription ID for spoke peering and shared services."
+  default     = ""
+}
+
+variable "hub_resource_group_name" {
+  type        = string
+  description = "Hub resource group name containing VNet and LAW."
+  default     = ""
+}
+
+variable "hub_vnet_name" {
+  type        = string
+  description = "Hub VNet name for peering."
+  default     = ""
+}
+
+variable "hub_law_name" {
+  type        = string
+  description = "Hub Log Analytics workspace name."
+  default     = ""
+}
+
+variable "common_tags" {
+  type        = map(string)
+  description = "Optional extra tags merged into the default tagging set."
+  default     = {}
 }
 
 variable "foundry_model_name" {
@@ -81,17 +105,4 @@ variable "public_client_redirect_uris" {
   type        = list(string)
   description = "Redirect URIs for public client sign-in."
   default     = ["https://login.microsoftonline.com/common/oauth2/nativeclient"]
-}
-
-variable "hub_virtual_network_id" {
-  type        = string
-  description = "Optional hub VNet ID for spoke peering."
-  default     = null
-  nullable    = true
-}
-
-variable "common_tags" {
-  type        = map(string)
-  description = "Optional extra tags merged into the default tagging set."
-  default     = {}
 }

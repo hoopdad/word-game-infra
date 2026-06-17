@@ -103,6 +103,20 @@ resource "azurerm_network_security_rule" "container_apps_deny_all_inbound" {
   network_security_group_name = azurerm_network_security_group.container_apps.name
 }
 
+resource "azurerm_network_security_rule" "private_endpoints_allow_container_apps" {
+  name                        = "allow-container-apps-subnet"
+  priority                    = 100
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_ranges     = ["443", "10255", "1433"]
+  source_address_prefix       = local.cidr.container_apps
+  destination_address_prefix  = "*"
+  resource_group_name         = azurerm_resource_group.main.name
+  network_security_group_name = azurerm_network_security_group.private_endpoints.name
+}
+
 resource "azurerm_network_security_rule" "private_endpoints_deny_all_inbound" {
   name                        = "deny-all-inbound"
   priority                    = 4000
@@ -169,13 +183,20 @@ resource "azurerm_subnet_network_security_group_association" "private_endpoints"
   network_security_group_id = azurerm_network_security_group.private_endpoints.id
 }
 
+data "azurerm_virtual_network" "hub" {
+  count               = var.hub_vnet_name != "" ? 1 : 0
+  provider            = azurerm.hub
+  name                = var.hub_vnet_name
+  resource_group_name = var.hub_resource_group_name
+}
+
 resource "azurerm_virtual_network_peering" "spoke_to_hub" {
-  count = var.hub_virtual_network_id == null ? 0 : 1
+  count = var.hub_vnet_name != "" ? 1 : 0
 
   name                         = "${local.prefix}-to-hub"
   resource_group_name          = azurerm_resource_group.main.name
   virtual_network_name         = azurerm_virtual_network.spoke.name
-  remote_virtual_network_id    = var.hub_virtual_network_id
+  remote_virtual_network_id    = data.azurerm_virtual_network.hub[0].id
   allow_virtual_network_access = true
   allow_forwarded_traffic      = true
   allow_gateway_transit        = false

@@ -15,7 +15,7 @@ resource "azurerm_container_app_environment" "edge" {
   resource_group_name            = azurerm_resource_group.main.name
   log_analytics_workspace_id     = azurerm_log_analytics_workspace.main.id
   infrastructure_subnet_id       = azurerm_subnet.ingress.id
-  internal_load_balancer_enabled = false
+  internal_load_balancer_enabled = true
   zone_redundancy_enabled        = false
   tags                           = local.tags
 }
@@ -49,7 +49,7 @@ resource "azurerm_container_app" "web" {
   }
 
   template {
-    min_replicas = 0
+    min_replicas = 1
     max_replicas = 2
 
     container {
@@ -108,7 +108,7 @@ resource "azurerm_container_app" "api" {
   }
 
   template {
-    min_replicas = 0
+    min_replicas = 1
     max_replicas = 2
 
     container {
@@ -172,7 +172,7 @@ resource "azurerm_container_app" "agent" {
   }
 
   template {
-    min_replicas = 0
+    min_replicas = 1
     max_replicas = 2
 
     container {
@@ -225,7 +225,7 @@ resource "azurerm_container_app" "waf" {
   }
 
   ingress {
-    external_enabled = true
+    external_enabled = false
     target_port      = 8080
     transport        = "http"
 
@@ -236,7 +236,7 @@ resource "azurerm_container_app" "waf" {
   }
 
   template {
-    min_replicas = 0
+    min_replicas = 1
     max_replicas = 2
 
     container {

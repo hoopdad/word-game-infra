@@ -1,0 +1,75 @@
+# Network Flow Contracts — word-game-infra
+# Documents all allowed network flows between services.
+
+flows:
+  - name: internet-to-waf
+    source: Internet
+    target: word-game-waf
+    port: 443
+    protocol: HTTPS
+    subnet: ingress
+    notes: "External traffic enters via WAF container app (internal LB, exposed via future Front Door/App GW)"
+
+  - name: waf-to-web
+    source: word-game-waf
+    target: word-game-web
+    port: 8080
+    protocol: HTTP
+    subnet: container-apps
+    notes: "WAF forwards web requests to web frontend"
+
+  - name: waf-to-api
+    source: word-game-waf
+    target: word-game-api
+    port: 8081
+    protocol: HTTP
+    subnet: container-apps
+    notes: "WAF forwards API requests to API backend"
+
+  - name: web-to-api
+    source: word-game-web
+    target: word-game-api
+    port: 8081
+    protocol: HTTP
+    subnet: container-apps
+    notes: "Web frontend calls API for data"
+
+  - name: api-to-cosmos
+    source: word-game-api
+    target: cosmos-db
+    port: 443
+    protocol: HTTPS
+    subnet: private-endpoints
+    notes: "API reads/writes game state via private endpoint"
+
+  - name: api-to-agent
+    source: word-game-api
+    target: word-game-agent
+    port: 8082
+    protocol: HTTP
+    subnet: container-apps
+    notes: "API delegates AI tasks to agent service"
+
+  - name: agent-to-foundry
+    source: word-game-agent
+    target: azure-ai-foundry
+    port: 443
+    protocol: HTTPS
+    subnet: private-endpoints
+    notes: "Agent calls Azure AI Foundry for GPT-4.1-mini inference"
+
+  - name: all-apps-to-keyvault
+    source: container-apps
+    target: key-vault
+    port: 443
+    protocol: HTTPS
+    subnet: private-endpoints
+    notes: "All container apps read secrets from Key Vault via private endpoint"
+
+  - name: all-apps-to-acr
+    source: container-apps
+    target: acr
+    port: 443
+    protocol: HTTPS
+    subnet: private-endpoints
+    notes: "All container apps pull images from ACR via private endpoint"

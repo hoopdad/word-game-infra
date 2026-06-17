@@ -1,3 +1,10 @@
+data "azurerm_log_analytics_workspace" "hub" {
+  count               = var.hub_law_name != "" ? 1 : 0
+  provider            = azurerm.hub
+  name                = var.hub_law_name
+  resource_group_name = var.hub_resource_group_name
+}
+
 resource "azurerm_log_analytics_workspace" "main" {
   name                = local.names.log_analytics
   location            = azurerm_resource_group.main.location
