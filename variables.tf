@@ -1,0 +1,97 @@
+variable "subscription_id" {
+  type        = string
+  description = "Azure subscription ID used for deployment."
+  default     = "00000000-0000-0000-0000-000000000000"
+}
+
+variable "tenant_id" {
+  type        = string
+  description = "Microsoft Entra tenant ID."
+  default     = "00000000-0000-0000-0000-000000000000"
+}
+
+variable "location" {
+  type        = string
+  description = "Azure region for all resources."
+  default     = "centralus"
+}
+
+variable "environment" {
+  type        = string
+  description = "Deployment environment."
+  default     = "dev"
+}
+
+variable "container_image_tag" {
+  type        = string
+  description = "Container image tag used for all apps."
+  default     = "latest"
+}
+
+variable "log_analytics_daily_quota_gb" {
+  type        = number
+  description = "Daily ingestion cap (GB/day) for Log Analytics."
+  default     = 1
+}
+
+variable "enable_acr_private_endpoint" {
+  type        = bool
+  description = "When true, upgrades ACR to Premium and creates a private endpoint."
+  default     = false
+}
+
+variable "foundry_model_name" {
+  type        = string
+  description = "Model name for Azure AI deployment."
+  default     = "gpt-4.1-mini"
+}
+
+variable "foundry_model_version" {
+  type        = string
+  description = "Model version for Azure AI deployment."
+  default     = "2025-04-14"
+}
+
+variable "foundry_api_key_override" {
+  type        = string
+  description = "Optional override for storing a pre-provisioned Foundry API key in Key Vault."
+  default     = ""
+  sensitive   = true
+}
+
+variable "github_repository" {
+  type        = string
+  description = "GitHub repository in owner/name format for OIDC federation."
+  default     = "mike/word-game"
+}
+
+variable "github_branch" {
+  type        = string
+  description = "GitHub branch allowed in OIDC federation subject."
+  default     = "main"
+}
+
+variable "web_redirect_uris" {
+  type        = list(string)
+  description = "Redirect URIs for the SPA app registration."
+  default     = ["http://localhost:5173/auth/callback"]
+}
+
+variable "public_client_redirect_uris" {
+  type        = list(string)
+  description = "Redirect URIs for public client sign-in."
+  default     = ["https://login.microsoftonline.com/common/oauth2/nativeclient"]
+}
+
+variable "hub_virtual_network_id" {
+  type        = string
+  description = "Optional hub VNet ID for spoke peering."
+  default     = null
+  nullable    = true
+}
+
+variable "common_tags" {
+  type        = map(string)
+  description = "Optional extra tags merged into the default tagging set."
+  default     = {}
+}

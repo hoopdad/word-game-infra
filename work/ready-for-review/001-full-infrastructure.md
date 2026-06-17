@@ -89,3 +89,18 @@ All infrastructure for the word-game multiplayer platform must be provisioned in
 - `terraform fmt -check -recursive`
 - `terraform validate` (after `terraform init`)
 - All files must pass validation before handoff
+
+---
+
+## Specialist Implementation Summary (2026-06-17)
+- Scaffolded a complete Terraform project for this greenfield repo with `azurerm >= 4.0`, `azuread`, `null`, and `random` providers.
+- Implemented Central US spoke networking: VNet, ingress/container-apps/private-endpoints subnets, subnet NSGs with explicit allow-only required flows plus deny-all-inbound, and optional spoke-to-hub peering.
+- Provisioned Container Apps architecture with four apps (`word-game-web`, `word-game-api`, `word-game-agent`, `word-game-waf`), managed identity + `AcrPull`, scale-to-zero defaults, right-sized CPU/memory, and readiness/liveness probes.
+- Added Cosmos DB serverless (NoSQL API) with required `word-game` database containers and partition keys, plus private endpoint.
+- Added ACR with Basic-by-default dev posture and conditional Premium+private-endpoint mode.
+- Added Key Vault (RBAC mode), private endpoint, and secrets for Cosmos connection string, Foundry endpoint/key, and Entra app IDs.
+- Added Azure AI resources: Azure AI account + model deployment (`gpt-4.1-mini` default), plus hub/project bootstrap via Azure CLI in Terraform `null_resource`.
+- Added monitoring stack: Log Analytics (1 GB/day cap), Application Insights, and diagnostic settings for Container Apps and Cosmos DB.
+- Added identity and RBAC bindings for managed identity (`AcrPull`, `Cosmos DB Built-in Data Contributor`, `Key Vault Secrets User`, `Cognitive Services User`) and GitHub Actions OIDC federation.
+- Added Entra app registrations for web/API (`access_as_user` scope), self-service signup flow bootstrap via Graph CLI, and outputs for integration by other repos.
+- Logged AVM coverage gap decisions in `.decisions/log.md` for AI Foundry hub/project and Entra External ID user flows.
