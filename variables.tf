@@ -95,11 +95,6 @@ variable "github_branch" {
   default     = "main"
 }
 
-variable "web_redirect_uris" {
-  type        = list(string)
-  description = "Redirect URIs for the SPA app registration."
-  default     = ["http://localhost:5173/auth/callback"]
-}
 
 variable "public_client_redirect_uris" {
   type        = list(string)

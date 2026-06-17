@@ -33,7 +33,7 @@ resource "azuread_application" "web" {
   }
 
   single_page_application {
-    redirect_uris = var.web_redirect_uris
+    redirect_uris = ["https://${azurerm_container_app.waf.ingress[0].fqdn}/auth/callback"]
   }
 
   public_client {

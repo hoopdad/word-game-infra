@@ -34,7 +34,6 @@ locals {
     cosmos_database         = "word-game"
     key_vault               = "${local.prefix}-kv"
     foundry_account         = "${local.prefix}-foundry"
-    foundry_hub             = "${local.prefix}-foundry-hub"
     foundry_project         = "${local.prefix}-foundry-project"
     acr                     = "wordgame${local.env}acr"
     web_app_registration    = "${local.prefix}-web"
@@ -43,10 +42,10 @@ locals {
   }
 
   cidr = {
-    vnet              = "10.42.0.0/16"
-    ingress           = "10.42.0.0/24"
-    container_apps    = "10.42.1.0/23"
-    private_endpoints = "10.42.3.0/24"
+    vnet              = "10.0.32.0/22"
+    ingress           = "10.0.32.0/24"
+    container_apps    = "10.0.34.0/23"
+    private_endpoints = "10.0.33.0/24"
   }
 
   foundry_api_key_value = var.foundry_api_key_override != "" ? var.foundry_api_key_override : azurerm_cognitive_account.foundry.primary_access_key

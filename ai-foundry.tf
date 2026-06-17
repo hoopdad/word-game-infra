@@ -27,23 +27,19 @@ resource "azurerm_cognitive_deployment" "gpt_41_mini" {
   }
 }
 
-resource "null_resource" "foundry_hub_project" {
-  triggers = {
-    resource_group = azurerm_resource_group.main.name
-    location       = azurerm_resource_group.main.location
-    hub_name       = local.names.foundry_hub
-    project_name   = local.names.foundry_project
-    subscription   = var.subscription_id
+resource "azapi_resource" "foundry_project" {
+  type      = "Microsoft.CognitiveServices/accounts/projects@2025-06-01"
+  name      = local.names.foundry_project
+  location  = azurerm_resource_group.main.location
+  parent_id = azurerm_cognitive_account.foundry.id
+
+  identity {
+    type = "SystemAssigned"
   }
 
-  provisioner "local-exec" {
-    command = <<-EOT
-      set -euo pipefail
-      az extension add --name ml --only-show-errors >/dev/null 2>&1 || true
-      az ml workspace create --resource-group ${self.triggers.resource_group} --name ${self.triggers.hub_name} --location ${self.triggers.location} --kind hub --only-show-errors >/dev/null
-      az ml workspace create --resource-group ${self.triggers.resource_group} --name ${self.triggers.project_name} --location ${self.triggers.location} --kind project --hub-id /subscriptions/${self.triggers.subscription}/resourceGroups/${self.triggers.resource_group}/providers/Microsoft.MachineLearningServices/workspaces/${self.triggers.hub_name} --only-show-errors >/dev/null
-    EOT
+  body = {
+    properties = {}
   }
 
-  depends_on = [azurerm_cognitive_account.foundry]
+  tags = local.tags
 }
