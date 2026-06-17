@@ -1,25 +1,19 @@
-resource "azurerm_container_registry" "main" {
-  name                = local.names.acr
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
-  sku                 = "Premium"
-  admin_enabled       = false
+module "acr" {
+  source  = "Azure/avm-res-containerregistry-registry/azurerm"
+  version = "~> 0.5"
 
+  name                          = local.names.acr
+  location                      = azurerm_resource_group.main.location
+  resource_group_name           = azurerm_resource_group.main.name
+  sku                           = "Premium"
+  admin_enabled                 = false
   public_network_access_enabled = false
+  enable_telemetry              = false
   tags                          = local.tags
-}
 
-resource "azurerm_private_endpoint" "acr" {
-  name                = "${local.prefix}-acr-pe"
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
-  subnet_id           = azurerm_subnet.private_endpoints.id
-  tags                = local.tags
-
-  private_service_connection {
-    name                           = "${local.prefix}-acr-psc"
-    private_connection_resource_id = azurerm_container_registry.main.id
-    is_manual_connection           = false
-    subresource_names              = ["registry"]
+  private_endpoints = {
+    "registry" = {
+      subnet_resource_id = module.vnet.subnets["private_endpoints"].resource_id
+    }
   }
 }

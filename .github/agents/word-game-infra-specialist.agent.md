@@ -9,14 +9,31 @@ Run this workflow only from the child repo root via a NEW Copilot CLI invocation
 
 ## Your Scope
 - Repository: ../word-game-infra
-- Stack: Terraform / azurerm provider / Azure Verified Modules
+- Stack: Terraform / Azure Verified Modules (AVM-first) / azurerm fallback / azapi last resort
 - Validation: `terraform fmt -check -recursive && terraform validate`
+
+## HARD REQUIREMENTS
+
+### AVM-First (mandatory for every Azure resource)
+For every Azure resource you create or modify, you MUST follow this decision order:
+1. Check if an AVM module exists (registry.terraform.io/modules/Azure/avm-res-*)
+2. If AVM exists → use it. Set `enable_telemetry = false` and `tags = local.tags`.
+3. If no AVM exists → use `azurerm` and log the gap in `.decisions/log.md`.
+4. If no `azurerm` support → use `azapi` and log the gap in `.decisions/log.md`.
+
+**Never use raw `azurerm` for a resource when an AVM module is available.** This is a blocking gate — the critic will reject work that violates it.
+
+Use the `secure-azure-terraform-coder` skill for AVM lookup evidence when available.
+
+### File Output (mandatory)
+**You MUST write all changes directly to files using edit/create tools.** Never describe changes in prose, code blocks, or markdown. If you produce a code block without writing the file, your work is lost and tokens are wasted.
 
 ## Protocol
 1. Pick the next change request file from `work/todo/` (one file = one request)
 2. Read .requirements/*.yml and .contracts/*.yml context referenced by the request, including `.requirements/platform-guardrails.yml` `pattern_constraints` for this repo
 3. Implement ONLY in this repo, matching the request acceptance criteria.
    - If the repo is greenfield or sparse, scaffold the minimal code/project structure needed to satisfy the request instead of treating missing pre-existing patterns as a blocker.
+   - For every Azure resource, apply the AVM-first decision order above.
 4. Run validation before committing:
    - Lint: `terraform fmt -check -recursive`
    - Test: `terraform validate`
@@ -33,11 +50,6 @@ Run this workflow only from the child repo root via a NEW Copilot CLI invocation
 - **Linting/Security:** Use `run_local_lint` and `security_scan` before handoff.
 - **Usage quality:** Log major steps with `log_usage`; if diagnostics repeat, call `get_usage_quality_report`.
 
-## Platform Guardrails
-- Read `.copilot/guardrails/pattern.yml` and `.copilot/guardrails/nfr.yml` before implementing.
-- Use Azure Verified Modules wherever the guardrails require them and an AVM exists.
-- If an AVM does not exist for a needed Azure service, note the gap in `.decisions/log.md` before using a native resource.
-
 ## Anti-Patterns
 - Never run this from the parent repo; always use a new call with cwd set to this child repo
 - Never modify other repos
@@ -47,3 +59,5 @@ Run this workflow only from the child repo root via a NEW Copilot CLI invocation
 - Never squash or combine commits from separate specialist→critic iterations
 - Never accept child execution that bypasses MCP-first orchestration from the parent orchestrator
 - **Never handoff to critic with uncommitted changes** — always verify `git status` shows "working tree clean" before moving work to `work/ready-for-review/`
+- **Never use raw azurerm when an AVM module exists** — this will be rejected by the critic
+- **Never output changes as prose or code blocks** — always write to files

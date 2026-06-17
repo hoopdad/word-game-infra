@@ -10,6 +10,14 @@ terraform {
       source  = "hashicorp/azuread"
       version = "~> 3.0"
     }
+    azapi = {
+      source  = "Azure/azapi"
+      version = "~> 2.4"
+    }
+    modtm = {
+      source  = "azure/modtm"
+      version = "~> 0.3"
+    }
     null = {
       source  = "hashicorp/null"
       version = "~> 3.2"

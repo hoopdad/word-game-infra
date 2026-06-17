@@ -2,8 +2,8 @@ resource "azurerm_container_app_environment" "internal" {
   name                           = local.names.internal_cae
   location                       = azurerm_resource_group.main.location
   resource_group_name            = azurerm_resource_group.main.name
-  log_analytics_workspace_id     = azurerm_log_analytics_workspace.main.id
-  infrastructure_subnet_id       = azurerm_subnet.container_apps.id
+  log_analytics_workspace_id     = module.log_analytics.resource_id
+  infrastructure_subnet_id       = module.vnet.subnets["container_apps"].resource_id
   internal_load_balancer_enabled = true
   zone_redundancy_enabled        = false
   tags                           = local.tags
@@ -13,8 +13,8 @@ resource "azurerm_container_app_environment" "edge" {
   name                           = local.names.edge_cae
   location                       = azurerm_resource_group.main.location
   resource_group_name            = azurerm_resource_group.main.name
-  log_analytics_workspace_id     = azurerm_log_analytics_workspace.main.id
-  infrastructure_subnet_id       = azurerm_subnet.ingress.id
+  log_analytics_workspace_id     = module.log_analytics.resource_id
+  infrastructure_subnet_id       = module.vnet.subnets["ingress"].resource_id
   internal_load_balancer_enabled = true
   zone_redundancy_enabled        = false
   tags                           = local.tags
@@ -33,7 +33,7 @@ resource "azurerm_container_app" "web" {
   }
 
   registry {
-    server   = azurerm_container_registry.main.login_server
+    server   = module.acr.resource.login_server
     identity = azurerm_user_assigned_identity.container_apps.id
   }
 
@@ -54,7 +54,7 @@ resource "azurerm_container_app" "web" {
 
     container {
       name   = "web"
-      image  = "${azurerm_container_registry.main.login_server}/word-game-web:${var.container_image_tag}"
+      image  = "${module.acr.resource.login_server}/word-game-web:${var.container_image_tag}"
       cpu    = 0.25
       memory = "0.5Gi"
 
@@ -92,7 +92,7 @@ resource "azurerm_container_app" "api" {
   }
 
   registry {
-    server   = azurerm_container_registry.main.login_server
+    server   = module.acr.resource.login_server
     identity = azurerm_user_assigned_identity.container_apps.id
   }
 
@@ -113,13 +113,13 @@ resource "azurerm_container_app" "api" {
 
     container {
       name   = "api"
-      image  = "${azurerm_container_registry.main.login_server}/word-game-api:${var.container_image_tag}"
+      image  = "${module.acr.resource.login_server}/word-game-api:${var.container_image_tag}"
       cpu    = 0.25
       memory = "0.5Gi"
 
       env {
         name  = "COSMOS_ENDPOINT"
-        value = azurerm_cosmosdb_account.main.endpoint
+        value = module.cosmos.endpoint
       }
 
       liveness_probe {
@@ -156,7 +156,7 @@ resource "azurerm_container_app" "agent" {
   }
 
   registry {
-    server   = azurerm_container_registry.main.login_server
+    server   = module.acr.resource.login_server
     identity = azurerm_user_assigned_identity.container_apps.id
   }
 
@@ -177,7 +177,7 @@ resource "azurerm_container_app" "agent" {
 
     container {
       name   = "agent"
-      image  = "${azurerm_container_registry.main.login_server}/word-game-agent:${var.container_image_tag}"
+      image  = "${module.acr.resource.login_server}/word-game-agent:${var.container_image_tag}"
       cpu    = 0.25
       memory = "0.5Gi"
 
@@ -220,7 +220,7 @@ resource "azurerm_container_app" "waf" {
   }
 
   registry {
-    server   = azurerm_container_registry.main.login_server
+    server   = module.acr.resource.login_server
     identity = azurerm_user_assigned_identity.container_apps.id
   }
 
@@ -241,7 +241,7 @@ resource "azurerm_container_app" "waf" {
 
     container {
       name   = "waf"
-      image  = "${azurerm_container_registry.main.login_server}/word-game-waf:${var.container_image_tag}"
+      image  = "${module.acr.resource.login_server}/word-game-waf:${var.container_image_tag}"
       cpu    = 0.25
       memory = "0.5Gi"
 
@@ -269,7 +269,7 @@ resource "azurerm_container_app" "waf" {
 resource "azurerm_monitor_diagnostic_setting" "container_apps_web" {
   name                       = "${local.prefix}-diag-web"
   target_resource_id         = azurerm_container_app.web.id
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id
+  log_analytics_workspace_id = module.log_analytics.resource_id
 
   enabled_log {
     category_group = "allLogs"
@@ -283,7 +283,7 @@ resource "azurerm_monitor_diagnostic_setting" "container_apps_web" {
 resource "azurerm_monitor_diagnostic_setting" "container_apps_api" {
   name                       = "${local.prefix}-diag-api"
   target_resource_id         = azurerm_container_app.api.id
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id
+  log_analytics_workspace_id = module.log_analytics.resource_id
 
   enabled_log {
     category_group = "allLogs"
@@ -297,7 +297,7 @@ resource "azurerm_monitor_diagnostic_setting" "container_apps_api" {
 resource "azurerm_monitor_diagnostic_setting" "container_apps_agent" {
   name                       = "${local.prefix}-diag-agent"
   target_resource_id         = azurerm_container_app.agent.id
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id
+  log_analytics_workspace_id = module.log_analytics.resource_id
 
   enabled_log {
     category_group = "allLogs"
@@ -311,7 +311,7 @@ resource "azurerm_monitor_diagnostic_setting" "container_apps_agent" {
 resource "azurerm_monitor_diagnostic_setting" "container_apps_waf" {
   name                       = "${local.prefix}-diag-waf"
   target_resource_id         = azurerm_container_app.waf.id
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id
+  log_analytics_workspace_id = module.log_analytics.resource_id
 
   enabled_log {
     category_group = "allLogs"

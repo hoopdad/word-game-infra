@@ -15,17 +15,17 @@ output "container_app_fqdns" {
 
 output "cosmos_endpoint" {
   description = "Cosmos DB endpoint."
-  value       = azurerm_cosmosdb_account.main.endpoint
+  value       = module.cosmos.endpoint
 }
 
 output "acr_login_server" {
   description = "Azure Container Registry login server."
-  value       = azurerm_container_registry.main.login_server
+  value       = module.acr.resource.login_server
 }
 
 output "key_vault_uri" {
   description = "Key Vault URI."
-  value       = azurerm_key_vault.main.vault_uri
+  value       = module.key_vault.uri
 }
 
 output "managed_identity_client_id" {
