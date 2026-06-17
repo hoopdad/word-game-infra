@@ -20,8 +20,11 @@ if [ -z "$API_APP_ID" ]; then
   API_APP_ID=$(az ad app create \
     --display-name "$API_APP_NAME" \
     --sign-in-audience AzureADMyOrg \
-    --identifier-uris "api://$API_APP_NAME" \
     --query appId -o tsv)
+
+  # Set identifier URI using the app's own ID (required by tenant policy)
+  az ad app update --id "$API_APP_ID" \
+    --identifier-uris "api://$API_APP_ID" --only-show-errors
 
   # Add access_as_user scope
   SCOPE_ID=$(cat /proc/sys/kernel/random/uuid)
