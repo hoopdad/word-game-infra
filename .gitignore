@@ -7,3 +7,4 @@ tfplan
 .env
 plan.out
 terraform.tfvars
+.metrics/

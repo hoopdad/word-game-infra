@@ -1,5 +1,3 @@
-data "azurerm_client_config" "current" {}
-
 module "managed_identity" {
   source  = "Azure/avm-res-managedidentity-userassignedidentity/azurerm"
   version = "~> 0.5"
@@ -37,8 +35,8 @@ resource "azurerm_role_assignment" "cognitive_services_user" {
   principal_id         = module.managed_identity.principal_id
 }
 
-resource "azurerm_role_assignment" "key_vault_secrets_user_deployer" {
-  scope                = module.key_vault.resource_id
-  role_definition_name = "Key Vault Secrets Officer"
-  principal_id         = data.azurerm_client_config.current.object_id
+resource "azurerm_role_assignment" "foundry_private_endpoint_rg_reader" {
+  scope                = azurerm_resource_group.main.id
+  role_definition_name = "Reader"
+  principal_id         = module.foundry_account.system_assigned_mi_principal_id
 }

@@ -47,6 +47,4 @@ locals {
     container_apps    = "10.0.34.0/23"
     private_endpoints = "10.0.33.0/24"
   }
-
-  foundry_api_key_value = var.foundry_api_key_override != "" ? var.foundry_api_key_override : module.foundry_account.primary_access_key
 }

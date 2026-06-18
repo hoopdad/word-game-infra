@@ -23,7 +23,7 @@ module "cosmos" {
   }]
 
   public_network_access_enabled = false
-  local_authentication_disabled = false
+  local_authentication_disabled = true
 
   sql_databases = {
     "word-game" = {

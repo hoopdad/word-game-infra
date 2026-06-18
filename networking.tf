@@ -144,13 +144,6 @@ module "vnet" {
     "ingress" = {
       name             = local.names.ingress_subnet
       address_prefixes = [local.cidr.ingress]
-      delegation = [{
-        name = "container-apps-edge"
-        service_delegation = {
-          name    = "Microsoft.App/environments"
-          actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
-        }
-      }]
       network_security_group = {
         id = azurerm_network_security_group.ingress.id
       }
@@ -158,11 +151,10 @@ module "vnet" {
     "container_apps" = {
       name             = local.names.container_apps_subnet
       address_prefixes = [local.cidr.container_apps]
-      delegation = [{
+      delegations = [{
         name = "container-apps-internal"
         service_delegation = {
-          name    = "Microsoft.App/environments"
-          actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
+          name = "Microsoft.App/environments"
         }
       }]
       network_security_group = {

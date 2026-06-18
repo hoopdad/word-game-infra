@@ -4,26 +4,26 @@ output "resource_group_name" {
 }
 
 output "container_app_environment_ids" {
-  description = "Container App Environment resource IDs."
+  description = "Container App Environment resource IDs. The edge key is a compatibility alias to the shared internal environment."
   value = {
     internal = module.container_app_environment_internal.resource_id
-    edge     = module.container_app_environment_edge.resource_id
+    edge     = module.container_app_environment_internal.resource_id
   }
 }
 
 output "container_app_environment_names" {
-  description = "Container App Environment names."
+  description = "Container App Environment names. The edge key is a compatibility alias to the shared internal environment."
   value = {
     internal = module.container_app_environment_internal.name
-    edge     = module.container_app_environment_edge.name
+    edge     = module.container_app_environment_internal.name
   }
 }
 
 output "container_app_environment_default_domains" {
-  description = "Container App Environment default domains."
+  description = "Container App Environment default domains. The edge key is a compatibility alias to the shared internal environment."
   value = {
     internal = module.container_app_environment_internal.default_domain
-    edge     = module.container_app_environment_edge.default_domain
+    edge     = module.container_app_environment_internal.default_domain
   }
 }
 
