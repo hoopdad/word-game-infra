@@ -209,3 +209,32 @@ Completed all requested infra/governance updates in this repo:
 
 Operational prerequisite reminder from request 1c:
 - Self-hosted runners executing apply must have private DNS/routing reachability to Key Vault private endpoints (or temporarily use controlled public allow-list access during apply windows).
+
+## Critic PASS Rationale
+
+PASS — request 003 satisfies acceptance criteria and queue protocol:
+
+1. **Terraform fixes verified in code**
+   - Foundry deployment uses `GlobalStandard` and project management is enabled on AI account.
+   - Foundry project remains valid `azapi_resource` with current `accounts/projects@2025-06-01` type.
+   - Key Vault uses `network_acls.bypass = "AzureServices"` with public access disabled.
+   - Foundry key secret is corrected to `value_wo` + `value_wo_version`.
+   - Cosmos data-plane assignment is implemented with `azurerm_cosmosdb_sql_role_assignment` and built-in role definition ID `...0002`.
+   - Entra Terraform resources are removed (`entra.tf` deleted) and Entra outputs removed.
+
+2. **Container app split and delegation**
+   - Service `azurerm_container_app` resources and per-app diagnostics are removed from infra.
+   - Internal and edge Container App Environments remain as infra-owned primitives with environment diagnostics.
+   - Both environments reference delegated subnets via AVM-managed environment modules:
+     - internal -> `container_apps` subnet
+     - edge -> `ingress` subnet
+
+3. **AVM/governance/workflow requirements**
+   - AVM-first posture strengthened, including migrations for CAE, AI account/deployment, and user-assigned identity.
+   - Specialist and critic agent files include required AVM-first and validation guidance.
+   - `.github/copilot-instructions.md` added with naming/tagging/region/tool guidance.
+   - CI/CD workflows added with required ordering, OIDC auth flow, remote backend init in CD, and CAE output emission.
+
+4. **Validation evidence**
+   - `terraform fmt -check -recursive`, `terraform validate`, and `terraform plan -out=tfplan` succeeded.
+   - Checkov execution recorded with baseline findings and CI soft-fail behavior as requested.
