@@ -8,6 +8,8 @@ module "foundry_account" {
   kind                     = "AIServices"
   sku_name                 = "S0"
   allow_project_management = true
+  local_auth_enabled       = false
+  associated_projects      = [local.names.foundry_project]
 
   custom_subdomain_name         = replace(local.names.foundry_account, "-", "")
   public_network_access_enabled = false

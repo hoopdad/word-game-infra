@@ -127,67 +127,94 @@ resource "azurerm_network_security_rule" "private_endpoints_deny_all_inbound" {
   network_security_group_name = azurerm_network_security_group.private_endpoints.name
 }
 
-# --- VNet + Subnets + Peering via AVM ---
+# --- VNet (native resource — AVM VNet module has perpetual drift with delegated subnets) ---
 
-module "vnet" {
-  source  = "Azure/avm-res-network-virtualnetwork/azurerm"
-  version = "~> 0.17"
+resource "azurerm_virtual_network" "main" {
+  name                = local.names.vnet
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  address_space       = [local.cidr.vnet]
+  tags                = local.tags
+}
 
-  name             = local.names.vnet
-  location         = azurerm_resource_group.main.location
-  parent_id        = azurerm_resource_group.main.id
-  address_space    = [local.cidr.vnet]
-  enable_telemetry = false
-  tags             = local.tags
+resource "azurerm_subnet" "ingress" {
+  name                              = local.names.ingress_subnet
+  resource_group_name               = azurerm_resource_group.main.name
+  virtual_network_name              = azurerm_virtual_network.main.name
+  address_prefixes                  = [local.cidr.ingress]
+  default_outbound_access_enabled   = false
+  private_endpoint_network_policies = "Enabled"
 
-  subnets = {
-    "ingress" = {
-      name             = local.names.ingress_subnet
-      address_prefixes = [local.cidr.ingress]
-      delegation = [{
-        name = "container-apps-edge"
-        service_delegation = {
-          name    = "Microsoft.App/environments"
-          actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
-        }
-      }]
-      network_security_group = {
-        id = azurerm_network_security_group.ingress.id
-      }
-    }
-    "container_apps" = {
-      name             = local.names.container_apps_subnet
-      address_prefixes = [local.cidr.container_apps]
-      delegation = [{
-        name = "container-apps-internal"
-        service_delegation = {
-          name    = "Microsoft.App/environments"
-          actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
-        }
-      }]
-      network_security_group = {
-        id = azurerm_network_security_group.container_apps.id
-      }
-    }
-    "private_endpoints" = {
-      name             = local.names.private_endpoint_subnet
-      address_prefixes = [local.cidr.private_endpoints]
-      network_security_group = {
-        id = azurerm_network_security_group.private_endpoints.id
-      }
+  delegation {
+    name = "container-apps-edge"
+    service_delegation {
+      name    = "Microsoft.App/environments"
+      actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
     }
   }
 
-  peerings = var.hub_vnet_name != "" ? {
-    "spoke-to-hub" = {
-      name                               = "${local.prefix}-to-hub"
-      remote_virtual_network_resource_id = data.azurerm_virtual_network.hub[0].id
-      allow_virtual_network_access       = true
-      allow_forwarded_traffic            = true
-      allow_gateway_transit              = false
-      use_remote_gateways                = false
+  lifecycle {
+    ignore_changes = [delegation]
+  }
+}
+
+resource "azurerm_subnet" "container_apps" {
+  name                              = local.names.container_apps_subnet
+  resource_group_name               = azurerm_resource_group.main.name
+  virtual_network_name              = azurerm_virtual_network.main.name
+  address_prefixes                  = [local.cidr.container_apps]
+  default_outbound_access_enabled   = false
+  private_endpoint_network_policies = "Enabled"
+
+  delegation {
+    name = "container-apps-internal"
+    service_delegation {
+      name    = "Microsoft.App/environments"
+      actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
     }
-  } : {}
+  }
+
+  lifecycle {
+    ignore_changes = [delegation]
+  }
+}
+
+resource "azurerm_subnet" "private_endpoints" {
+  name                              = local.names.private_endpoint_subnet
+  resource_group_name               = azurerm_resource_group.main.name
+  virtual_network_name              = azurerm_virtual_network.main.name
+  address_prefixes                  = [local.cidr.private_endpoints]
+  default_outbound_access_enabled   = false
+  private_endpoint_network_policies = "Enabled"
+}
+
+resource "azurerm_subnet_network_security_group_association" "ingress" {
+  subnet_id                 = azurerm_subnet.ingress.id
+  network_security_group_id = azurerm_network_security_group.ingress.id
+}
+
+resource "azurerm_subnet_network_security_group_association" "container_apps" {
+  subnet_id                 = azurerm_subnet.container_apps.id
+  network_security_group_id = azurerm_network_security_group.container_apps.id
+}
+
+resource "azurerm_subnet_network_security_group_association" "private_endpoints" {
+  subnet_id                 = azurerm_subnet.private_endpoints.id
+  network_security_group_id = azurerm_network_security_group.private_endpoints.id
+}
+
+resource "azurerm_virtual_network_peering" "spoke_to_hub" {
+  count = var.hub_vnet_name != "" ? 1 : 0
+
+  name                      = "${local.prefix}-to-hub"
+  resource_group_name       = azurerm_resource_group.main.name
+  virtual_network_name      = azurerm_virtual_network.main.name
+  remote_virtual_network_id = data.azurerm_virtual_network.hub[0].id
+
+  allow_virtual_network_access = true
+  allow_forwarded_traffic      = true
+  allow_gateway_transit        = false
+  use_remote_gateways          = false
 }
 
 data "azurerm_virtual_network" "hub" {

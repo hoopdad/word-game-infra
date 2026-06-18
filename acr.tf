@@ -7,13 +7,13 @@ module "acr" {
   resource_group_name           = azurerm_resource_group.main.name
   sku                           = "Premium"
   admin_enabled                 = false
-  public_network_access_enabled = false
+  public_network_access_enabled = true
   enable_telemetry              = false
   tags                          = local.tags
 
   private_endpoints = {
     "registry" = {
-      subnet_resource_id = module.vnet.subnets["private_endpoints"].resource_id
+      subnet_resource_id = azurerm_subnet.private_endpoints.id
     }
   }
 }

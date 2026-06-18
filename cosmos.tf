@@ -23,7 +23,7 @@ module "cosmos" {
   }]
 
   public_network_access_enabled = false
-  local_authentication_disabled = false
+  local_authentication_disabled = true
 
   sql_databases = {
     "word-game" = {
@@ -51,7 +51,7 @@ module "cosmos" {
 
   private_endpoints = {
     "cosmos" = {
-      subnet_resource_id = module.vnet.subnets["private_endpoints"].resource_id
+      subnet_resource_id = azurerm_subnet.private_endpoints.id
       subresource_name   = "Sql"
     }
   }

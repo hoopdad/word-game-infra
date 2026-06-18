@@ -7,7 +7,6 @@ output "container_app_environment_ids" {
   description = "Container App Environment resource IDs."
   value = {
     internal = module.container_app_environment_internal.resource_id
-    edge     = module.container_app_environment_edge.resource_id
   }
 }
 
@@ -15,7 +14,6 @@ output "container_app_environment_names" {
   description = "Container App Environment names."
   value = {
     internal = module.container_app_environment_internal.name
-    edge     = module.container_app_environment_edge.name
   }
 }
 
@@ -23,7 +21,6 @@ output "container_app_environment_default_domains" {
   description = "Container App Environment default domains."
   value = {
     internal = module.container_app_environment_internal.default_domain
-    edge     = module.container_app_environment_edge.default_domain
   }
 }
 

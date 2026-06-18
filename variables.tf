@@ -76,18 +76,7 @@ variable "foundry_model_version" {
   default     = "2025-04-14"
 }
 
-variable "foundry_api_key_override" {
-  type        = string
-  description = "Optional override for storing a pre-provisioned Foundry API key in Key Vault."
-  default     = ""
-  sensitive   = true
-}
 
-variable "foundry_key_secret_value_version" {
-  type        = number
-  description = "Version tracker for the write-only Foundry API key Key Vault secret."
-  default     = 1
-}
 
 variable "entra_web_client_id" {
   type        = string
