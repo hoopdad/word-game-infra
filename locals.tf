@@ -25,6 +25,7 @@ locals {
     app_insights            = "${local.prefix}-appi"
     managed_identity        = "${local.prefix}-ca-mi"
     internal_cae            = "${local.prefix}-cae-internal"
+    edge_cae                = "${local.prefix}-cae-edge"
     web_app                 = "word-game-web"
     api_app                 = "word-game-api"
     agent_app               = "word-game-agent"
