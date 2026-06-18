@@ -55,12 +55,18 @@ module "cosmos" {
       subresource_name   = "Sql"
     }
   }
+}
 
-  diagnostic_settings = {
-    "cosmos" = {
-      name                  = "${local.prefix}-diag-cosmos"
-      workspace_resource_id = module.log_analytics.resource_id
-      metric_categories     = ["Requests"]
-    }
+resource "azurerm_monitor_diagnostic_setting" "cosmos" {
+  name                       = "${local.prefix}-diag-cosmos"
+  target_resource_id         = module.cosmos.resource_id
+  log_analytics_workspace_id = module.log_analytics.resource_id
+
+  enabled_log {
+    category_group = "allLogs"
+  }
+
+  enabled_metric {
+    category = "Requests"
   }
 }

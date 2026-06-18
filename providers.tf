@@ -8,8 +8,11 @@ provider "azurerm" {
 provider "azurerm" {
   alias = "hub"
   features {}
-  subscription_id = var.hub_subscription_id != "" ? var.hub_subscription_id : var.subscription_id
+  subscription_id = var.hub_subscription_id
   tenant_id       = var.tenant_id
 }
 
-provider "azapi" {}
+provider "azapi" {
+  subscription_id = var.subscription_id
+  tenant_id       = var.tenant_id
+}

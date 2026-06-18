@@ -1,0 +1,41 @@
+{
+  "_framework_version": "0.1.0",
+  "mcpServers": {
+    "terraform-local": {
+      "description": "Run deterministic local terraform fmt/init/validate/plan checks.",
+      "command": "/home/mike/source/enterprise-copilot-fleet-controller/.venv/bin/python3",
+      "args": ["/home/mike/source/enterprise-copilot-fleet-controller/tools/terraform-local/server.py"],
+      "env": {}
+    },
+    "azure-resource-status": {
+      "description": "Inventory Azure resources and inspect status/error events for troubleshooting.",
+      "command": "/home/mike/source/enterprise-copilot-fleet-controller/.venv/bin/python3",
+      "args": ["/home/mike/source/enterprise-copilot-fleet-controller/tools/azure-resource-status/server.py"],
+      "env": { "PROJECT_DIR": "/home/mike/source/word-game/word-game-harness" }
+    },
+    "azure-inspector": {
+      "description": "Read Container Apps, Cosmos DB, and ACR state via Azure CLI.",
+      "command": "/home/mike/source/enterprise-copilot-fleet-controller/.venv/bin/python3",
+      "args": ["/home/mike/source/enterprise-copilot-fleet-controller/tools/azure-inspector/server.py"],
+      "env": { "PROJECT_DIR": "/home/mike/source/word-game/word-game-harness" }
+    },
+    "lint-local": {
+      "description": "Run safe local lint commands (shellcheck/terraform fmt).",
+      "command": "/home/mike/source/enterprise-copilot-fleet-controller/.venv/bin/python3",
+      "args": ["/home/mike/source/enterprise-copilot-fleet-controller/tools/lint-local/server.py"],
+      "env": {}
+    },
+    "security-scanner": {
+      "description": "Run available scanners and normalize findings into one report.",
+      "command": "/home/mike/source/enterprise-copilot-fleet-controller/.venv/bin/python3",
+      "args": ["/home/mike/source/enterprise-copilot-fleet-controller/tools/security-scanner/server.py"],
+      "env": {}
+    },
+    "usage-tracker": {
+      "description": "Append usage events, summarize recent workflow activity, and report usage quality/anomalies.",
+      "command": "/home/mike/source/enterprise-copilot-fleet-controller/.venv/bin/python3",
+      "args": ["/home/mike/source/enterprise-copilot-fleet-controller/tools/usage-tracker/server.py"],
+      "env": { "PROJECT_DIR": "/home/mike/source/word-game/word-game-harness", "PROJECT_NAME": "word-game" }
+    }
+  }
+}
