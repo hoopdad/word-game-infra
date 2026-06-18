@@ -89,18 +89,6 @@ variable "foundry_key_secret_value_version" {
   default     = 1
 }
 
-variable "github_repository" {
-  type        = string
-  description = "GitHub repository in owner/name format for OIDC federation."
-  default     = "mike/word-game"
-}
-
-variable "github_branch" {
-  type        = string
-  description = "GitHub branch allowed in OIDC federation subject."
-  default     = "main"
-}
-
 variable "entra_web_client_id" {
   type        = string
   description = "External Entra web app client ID created outside Terraform."

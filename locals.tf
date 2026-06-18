@@ -38,7 +38,6 @@ locals {
     acr                     = "wordgame${local.env}acr"
     web_app_registration    = "${local.prefix}-web"
     api_app_registration    = "${local.prefix}-api"
-    cicd_app_registration   = "${local.prefix}-gha"
   }
 
   cidr = {
