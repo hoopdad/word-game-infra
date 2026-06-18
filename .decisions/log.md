@@ -2,8 +2,7 @@
 
 ## 2026-06-17
 
-- **AI Foundry hub/project provisioning:** No stable Azure Verified Module was used for AI Foundry hub/project at scaffold time. Terraform uses native `azurerm` resources for Azure AI account/deployment plus `null_resource` + Azure CLI for hub/project bootstrap.
-- **Entra External ID user flow provisioning:** No AVM exists for Entra External ID user flows. Terraform uses `null_resource` + Microsoft Graph via Azure CLI.
+- **Entra External ID user flow provisioning:** No AVM exists for Entra External ID user flows. Entra provisioning is handled outside Terraform via `scripts/setup-entra-external-id.sh`.
 
 ## 2026-06-17 — AVM Migration
 
@@ -12,9 +11,10 @@
 - **ACR + PE:** Migrated to `Azure/avm-res-containerregistry-registry/azurerm` (~> 0.5). Private endpoint managed via the module's `private_endpoints` map.
 - **Log Analytics:** Migrated to `Azure/avm-res-operationalinsights-workspace/azurerm` (~> 0.5). `azurerm_application_insights` kept as raw (no stable AVM).
 - **Cosmos DB + PE + Diagnostics:** Migrated to `Azure/avm-res-documentdb-databaseaccount/azurerm` (~> 0.9). Private endpoint and diagnostic settings managed via module maps. SQL databases and containers managed via the module's `sql_databases` map.
-- **Container Apps (kept raw):** No AVM migration — app-specific configuration, AVM adds minimal value for Container Apps.
-- **Identity / RBAC (kept raw):** No AVM migration — role assignments are simple single-resource blocks.
-- **AI Foundry (kept raw):** No stable AVM exists.
-- **Entra (kept raw):** No AVM exists for Entra app registrations or External ID.
+- **Container App Environments:** Migrated to `Azure/avm-res-app-managedenvironment/azurerm` (~> 0.5). Both internal and edge environments use delegated subnets and keep environment-level diagnostics.
+- **Identity:** Migrated user-assigned managed identity to `Azure/avm-res-managedidentity-userassignedidentity/azurerm` (~> 0.5). RBAC role assignments remain raw `azurerm` resources.
+- **AI Foundry account/deployment:** Migrated to `Azure/avm-res-cognitiveservices-account/azurerm` (~> 0.11) with `allow_project_management = true` and GPT-4.1-mini `GlobalStandard` deployment scale.
+- **AI Foundry project:** Kept as `azapi_resource` (`Microsoft.CognitiveServices/accounts/projects@2025-06-01`) because this child resource still requires azapi in this stack.
+- **Cosmos DB data-plane role assignment:** Used raw `azurerm_cosmosdb_sql_role_assignment` because this is a Cosmos SQL data-plane role model, not an Azure RBAC assignment.
 - Added `azapi` (~> 2.4) and `modtm` (~> 0.3) providers as required by AVM modules.
 - All AVM modules configured with `enable_telemetry = false` and `tags = local.tags`.

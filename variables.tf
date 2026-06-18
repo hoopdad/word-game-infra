@@ -83,6 +83,12 @@ variable "foundry_api_key_override" {
   sensitive   = true
 }
 
+variable "foundry_key_secret_value_version" {
+  type        = number
+  description = "Version tracker for the write-only Foundry API key Key Vault secret."
+  default     = 1
+}
+
 variable "github_repository" {
   type        = string
   description = "GitHub repository in owner/name format for OIDC federation."
@@ -93,6 +99,18 @@ variable "github_branch" {
   type        = string
   description = "GitHub branch allowed in OIDC federation subject."
   default     = "main"
+}
+
+variable "entra_web_client_id" {
+  type        = string
+  description = "External Entra web app client ID created outside Terraform."
+  default     = ""
+}
+
+variable "entra_api_client_id" {
+  type        = string
+  description = "External Entra API app client ID created outside Terraform."
+  default     = ""
 }
 
 
