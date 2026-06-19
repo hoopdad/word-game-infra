@@ -51,10 +51,26 @@ module "cosmos" {
 
   private_endpoints = {
     "cosmos" = {
-      subnet_resource_id = azurerm_subnet.private_endpoints.id
-      subresource_name   = "Sql"
+      subnet_resource_id            = azurerm_subnet.private_endpoints.id
+      subresource_name              = "Sql"
+      private_dns_zone_resource_ids = [azurerm_private_dns_zone.cosmos.id]
     }
   }
+}
+
+resource "azurerm_private_dns_zone" "cosmos" {
+  name                = "privatelink.documents.azure.com"
+  resource_group_name = azurerm_resource_group.main.name
+  tags                = local.tags
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "cosmos" {
+  name                  = "${local.prefix}-cosmos-dns-link"
+  resource_group_name   = azurerm_resource_group.main.name
+  private_dns_zone_name = azurerm_private_dns_zone.cosmos.name
+  virtual_network_id    = azurerm_virtual_network.main.id
+  registration_enabled  = false
+  tags                  = local.tags
 }
 
 resource "azurerm_monitor_diagnostic_setting" "cosmos" {

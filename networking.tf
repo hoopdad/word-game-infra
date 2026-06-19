@@ -113,6 +113,20 @@ resource "azurerm_network_security_rule" "private_endpoints_allow_container_apps
   network_security_group_name = azurerm_network_security_group.private_endpoints.name
 }
 
+resource "azurerm_network_security_rule" "private_endpoints_allow_ingress" {
+  name                        = "allow-ingress-subnet"
+  priority                    = 110
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_ranges     = ["443", "10255", "1433"]
+  source_address_prefix       = local.cidr.ingress
+  destination_address_prefix  = "*"
+  resource_group_name         = azurerm_resource_group.main.name
+  network_security_group_name = azurerm_network_security_group.private_endpoints.name
+}
+
 resource "azurerm_network_security_rule" "private_endpoints_deny_all_inbound" {
   name                        = "deny-all-inbound"
   priority                    = 4000
