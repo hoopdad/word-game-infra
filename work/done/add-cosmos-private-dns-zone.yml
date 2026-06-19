@@ -1,0 +1,64 @@
+title: "Add Cosmos DB private DNS zone for private endpoint resolution"
+priority: critical
+context: |
+  Both /api/categories/config and /api/users/active return HTTP 500 because
+  the API container resolves Cosmos DB FQDN to the public IP address.
+  Cosmos has public_network_access_enabled=false with a private endpoint, but
+  no privatelink.documents.azure.com DNS zone is created/linked to the VNet.
+  
+  Error from container logs:
+    azure.cosmos.exceptions.CosmosHttpResponseError: (Forbidden) Request originated
+    from IP 20.84.193.84 through public internet. This is blocked by your Cosmos DB
+    account firewall settings.
+
+  The private endpoint (pep-wordgame-dev-cosmos) exists on the PE subnet with
+  status "Approved" — only DNS resolution is missing.
+
+acceptance:
+  - scenario: "Cosmos DB reachable via private endpoint"
+    given: "privatelink.documents.azure.com DNS zone exists and is linked to VNet"
+    when: "API container resolves Cosmos FQDN"
+    then: "Resolution returns private IP from PE subnet (not public IP)"
+  - scenario: "Terraform plan is clean"
+    given: "DNS zone and VNet link resources are added"
+    when: "terraform plan runs"
+    then: "Only additive changes (no destroy/replace on existing resources)"
+
+implementation:
+  file: "cosmos.tf"
+  changes:
+    - description: "Add privatelink.documents.azure.com DNS zone resource"
+      detail: |
+        resource "azurerm_private_dns_zone" "cosmos" {
+          name                = "privatelink.documents.azure.com"
+          resource_group_name = azurerm_resource_group.main.name
+          tags                = local.tags
+        }
+    - description: "Add VNet link for Cosmos DNS zone"
+      detail: |
+        resource "azurerm_private_dns_zone_virtual_network_link" "cosmos" {
+          name                  = "${local.prefix}-cosmos-dns-link"
+          resource_group_name   = azurerm_resource_group.main.name
+          private_dns_zone_name = azurerm_private_dns_zone.cosmos.name
+          virtual_network_id    = azurerm_virtual_network.main.id
+          registration_enabled  = false
+          tags                  = local.tags
+        }
+    - description: "Update Cosmos module private_endpoints to include DNS zone"
+      detail: |
+        In the module "cosmos" private_endpoints block, add:
+          private_dns_zone_resource_ids = [azurerm_private_dns_zone.cosmos.id]
+        
+        The full block should become:
+        private_endpoints = {
+          "cosmos" = {
+            subnet_resource_id            = azurerm_subnet.private_endpoints.id
+            subresource_name              = "Sql"
+            private_dns_zone_resource_ids = [azurerm_private_dns_zone.cosmos.id]
+          }
+        }
+
+validation:
+  - "terraform fmt -check"
+  - "terraform init && terraform validate"
+  - "terraform plan shows only Add (no Destroy/Replace on cosmos account or endpoint)"
